@@ -266,27 +266,3 @@ module "proxy" {
     aws = aws.global_region
   }
 }
-
-################
-# Custom Domains
-################
-
-data "aws_route53_zone" "alias_domains" {
-  count = var.create_domain_name_records ? length(var.domain_zone_names) : 0
-
-  name = var.domain_zone_names[count.index]
-}
-
-resource "aws_route53_record" "alias_domains" {
-  count = var.create_domain_name_records ? length(var.domain_names) : 0
-
-  zone_id = data.aws_route53_zone.alias_domains[count.index].zone_id
-  name    = var.domain_names[count.index]
-  type    = "A"
-
-  alias {
-    name                   = module.proxy.cloudfront_domain_name
-    zone_id                = module.proxy.cloudfront_hosted_zone_id
-    evaluate_target_health = false
-  }
-}
